@@ -1,3 +1,5 @@
+import * as path from "path";
+
 const cron = require('node-cron');
 const fs = require('fs');
 const EventEmitter = require('events');
@@ -26,7 +28,7 @@ export class Birthday {
         if (this.options.minute < 0 || this.options.minute > 59) throw new Error("Invalid minute.");
 
         try {
-            this.birthdays = require(__dirname + "/birthdays.json");
+            this.birthdays = require(path.join(__dirname + "../../birthday.json"));
         } catch (err) {
             this.birthdays = {
                 guilds: {},
@@ -49,7 +51,7 @@ export class Birthday {
 
     private save: Function = (): Promise<Error | void> => {
         return new Promise((resolve, reject) => {
-            fs.writeFile(__dirname + "/birthday.json", JSON.stringify(this.birthdays, null, 4), (err: NodeJS.ErrnoException) => {
+            fs.writeFile(path.join(__dirname + "../../birthday.json"), JSON.stringify(this.birthdays, null, 4), (err: NodeJS.ErrnoException) => {
                 if (err) reject(err);
                 else resolve();
             });
