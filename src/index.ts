@@ -14,7 +14,6 @@ export class Birthday {
     constructor(Client: Client, Options?: Options) {
         this.client = Client;
         this.options = Options || {
-            dirname: './data/birthdays.json',
             timezone: Timezone.UTC,
             hour: 10,
             minute: 0
@@ -33,6 +32,7 @@ export class Birthday {
                 guilds: {},
                 birthdays: {}
             };
+            this.save();
         }
 
         cron.schedule(`${this.options.minute} ${this.options.hour} * * *`, () => {

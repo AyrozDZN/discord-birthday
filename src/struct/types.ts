@@ -3,7 +3,6 @@ import Timezone from "./timezone";
 export { Timezone };
 
 export type Options = {
-    dirname: string;
     timezone?: Timezone;
     hour?: number;
     minute?: number;
