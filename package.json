@@ -1,0 +1,48 @@
+{
+  "name": "discord-birthday",
+  "version": "1.0.0",
+  "description": "discord-birthday is a powerful package that allows you to create a birthday system on your discord bot easily and quickly.",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "exit 0"
+  },
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/"
+  ],
+  "module": "dist/index.mjs",
+  "exports": {
+    ".": {
+      "require": "./dist/index.js"
+    },
+    "./src/*": "./dist/*",
+    "./dist/*": "./dist/*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AyrozDZN/discord-birthday.git"
+  },
+  "keywords": [
+    "Discord",
+    "Birthday",
+    "Cron",
+    "Timezone",
+    "Events",
+    "fs"
+  ],
+  "author": "AyrozDZN",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/AyrozDZN/discord-birthday/issues"
+  },
+  "homepage": "https://github.com/AyrozDZN/discord-birthday#readme",
+  "devDependencies": {
+    "discord.js": "^14.0.3",
+    "typescript": "^4.7.4"
+  },
+  "dependencies": {
+    "events": "^3.3.0",
+    "fs": "^0.0.1-security",
+    "node-cron": "^3.0.1"
+  }
+}
