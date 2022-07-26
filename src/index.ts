@@ -199,6 +199,9 @@ export class Birthday {
         return new Promise((resolve, reject) => {
             if (!this.birthdays.birthdays[member.id]) reject(new Error("This member has no birthday."));
 
+            if (!this.birthdays.guilds[member.guild.id]) resolve();
+            if (this.birthdays.guilds[member.guild.id].birthdays.indexOf(member.id) === -1) resolve();
+
             this.birthdays.guilds[member.guild.id].birthdays.splice(this.birthdays.guilds[member.guild.id].birthdays.indexOf(member.id), 1);
             this.birthdays.birthdays[member.id].guilds.splice(this.birthdays.birthdays[member.id].guilds.indexOf(member.guild.id), 1);
 
@@ -215,6 +218,12 @@ export class Birthday {
 
     public setGuildBirthdayChannel: Function = (channel: TextChannel): Promise<Error | void> => {
         return new Promise((resolve, reject) => {
+            if (!this.birthdays.guilds[channel.guild.id]) {
+                this.birthdays.guilds[channel.guild.id] = {
+                    channels: "",
+                    birthdays: []
+                };
+            }
             this.birthdays.guilds[channel.guild.id].channels = channel.id;
 
             this.save().then(() => {
@@ -237,6 +246,7 @@ export class Birthday {
 
     public deleteGuildBirthdayChannel: Function = (guild: Guild): Promise<Error | void> => {
         return new Promise((resolve, reject) => {
+            if (this.birthdays.guilds[guild.id]) resolve();
             this.birthdays.guilds[guild.id].channels = "";
 
             this.save().then(() => {
