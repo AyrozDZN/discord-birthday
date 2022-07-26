@@ -3,15 +3,16 @@ import Timezone from "./timezone";
 export { Timezone };
 
 export type Options = {
-    timezone: Timezone;
-    hour: number;
-    minute: number;
+    dirname: string;
+    timezone?: Timezone;
+    hour?: number;
+    minute?: number;
 }
 
 export type Data = {
     userId: string,
     seeAge: boolean,
-    date: Date,
+    date: Date | string,
     guilds: string[]
 }
 
@@ -31,6 +32,7 @@ export type userBirthdayData = {
     date: Date,
     age: number,
     daysBeforeNext: number,
+    guilds: Guild[]
 }
 
 export type memberBirthdayData = {

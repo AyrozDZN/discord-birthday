@@ -8,26 +8,31 @@ export { Timezone };
 
 export class Birthday {
     private readonly client: Client;
-    private readonly options: Options;
-
+    private options: Options;
     private birthdays: BirthdayData;
 
-    constructor(Client: Client, Options: Options = {
-        timezone: Timezone.UTC,
-        hour: 0,
-        minute: 0,
-    }) {
+    constructor(Client: Client, Options?: Options) {
         this.client = Client;
-        this.options = Options;
+        this.options = Options || {
+            dirname: './data/birthdays.json',
+            timezone: Timezone.UTC,
+            hour: 10,
+            minute: 0
+        };
+        if (this.options.timezone === undefined) this.options.timezone = Timezone.UTC;
+        if (this.options.hour === undefined) this.options.hour = 10;
+        if (this.options.minute === undefined) this.options.minute = 0;
 
         if (this.options.hour < 0 || this.options.hour > 23) throw new Error("Invalid hour.");
         if (this.options.minute < 0 || this.options.minute > 59) throw new Error("Invalid minute.");
 
         try {
-            this.birthdays = require(__dirname + "/birthday.json");
-        } catch (error) {
-            this.init();
-            this.birthdays = require(__dirname + "/birthday.json");
+            this.birthdays = require(__dirname + "/birthdays.json");
+        } catch (err) {
+            this.birthdays = {
+                guilds: {},
+                birthdays: {}
+            };
         }
 
         cron.schedule(`${this.options.minute} ${this.options.hour} * * *`, () => {
@@ -42,19 +47,6 @@ export class Birthday {
         events.emit(event, ...args);
     }
 
-    private init: Function = (): Promise<Error | void> => {
-        return new Promise((resolve, reject) => {
-            const data: BirthdayData = {
-                guilds: {},
-                birthdays: {}
-            }
-            fs.writeFile(__dirname + "/birthday.json", JSON.stringify(data, null, 4), (err: NodeJS.ErrnoException) => {
-                if (err) reject(err);
-                else resolve();
-            });
-        })
-    }
-
     private save: Function = (): Promise<Error | void> => {
         return new Promise((resolve, reject) => {
             fs.writeFile(__dirname + "/birthday.json", JSON.stringify(this.birthdays, null, 4), (err: NodeJS.ErrnoException) => {
@@ -66,11 +58,13 @@ export class Birthday {
 
     private checkBirthdays: Function = (): void => {
         let now: Date = new Date();
+
         let guilds: Guild[];
 
         for (let userId in this.birthdays.birthdays) {
             const birthday: Data = this.birthdays.birthdays[userId];
-            if (birthday.date.getDate() == now.getDate() && birthday.date.getMonth() == now.getMonth()) {
+            let date: Date = new Date(birthday.date);
+            if (date.getDate() == now.getDate() && date.getMonth() == now.getMonth()) {
                 this.client.users.fetch(userId).then(async (user: User) => {
                     await birthday.guilds.forEach((guildId: string) => {
                         this.client.guilds.fetch(guildId).then((guild: Guild) => {
@@ -105,10 +99,11 @@ export class Birthday {
     };
 
     public getUserBirthday: Function = (user: User): Promise<userBirthdayData | Error> => {
-        return new Promise((resolve, reject) => {
+        let guilds: Guild[];
+        return new Promise(async (resolve, reject) => {
             if (!this.birthdays.birthdays[user.id]) reject(new Error("Birthday not defined for this user."));
 
-            const date: Date = this.birthdays.birthdays[user.id].date;
+            const date: Date = new Date(this.birthdays.birthdays[user.id].date);
             date.setFullYear(new Date().getFullYear());
             if (date.getTime() < Date.now()) {
                 date.setFullYear(new Date().getFullYear()+1);
@@ -118,12 +113,19 @@ export class Birthday {
                 daysBeforeNext = 0;
             }
 
+            await this.birthdays.birthdays[user.id].guilds.forEach((guildId: string) => {
+                this.client.guilds.fetch(guildId).then((guild: Guild) => {
+                    guilds.push(guild);
+                });
+            });
+
             const data: userBirthdayData = {
                 user: user,
                 seeAge: this.birthdays.birthdays[user.id].seeAge,
-                date: this.birthdays.birthdays[user.id].date,
-                age: Math.floor((Date.now() - this.birthdays.birthdays[user.id].date.getTime()) / (60 * 60 * 24 * 365.25 * 1000)),
-                daysBeforeNext: daysBeforeNext
+                date: new Date(this.birthdays.birthdays[user.id].date),
+                age: Math.floor((Date.now() - new Date(this.birthdays.birthdays[user.id].date).getTime()) / (60 * 60 * 24 * 365.25 * 1000)),
+                daysBeforeNext: daysBeforeNext,
+                guilds: guilds
             }
 
             resolve(data);
@@ -153,7 +155,7 @@ export class Birthday {
                         const data: memberBirthdayData = {
                             member: guildMember,
                             seeAge: userData.seeAge,
-                            date: userData.date,
+                            date: new Date(userData.date),
                             age: userData.age,
                             daysBeforeNext: userData.daysBeforeNext,
                             guild: guild
@@ -196,7 +198,7 @@ export class Birthday {
         });
     };
 
-    public checkGuildBirthdaysState: Function = (member: GuildMember): boolean => {
+    public checkMemberGuildBirthdaysStatus: Function = (member: GuildMember): boolean => {
         return !!this.birthdays.guilds[member.guild.id].birthdays.includes(member.id);
     };
 
@@ -211,23 +213,23 @@ export class Birthday {
         });
     };
 
-    public deleteGuildBirthdayChannel: Function = (channel: TextChannel): Promise<Error | void> => {
-        return new Promise((resolve, reject) => {
-            this.birthdays.guilds[channel.guild.id].channels
-
-            this.save().then(() => {
-                this.emit("birthdayGuildChannelDelete", channel);
-                resolve();
-            }).catch((err: Error) => reject(err));
-        });
-    }
-
     public getGuildBirthdayChannel: Function = (guild: Guild): Promise<NonThreadGuildBasedChannel | Error | null> => {
         return new Promise((resolve, reject) => {
             if (!this.birthdays.guilds[guild.id].channels) reject(new Error("This guild has no birthday channel."));
 
             guild.channels.fetch(this.birthdays.guilds[guild.id].channels).then(channel => {
                 resolve(channel);
+            }).catch((err: Error) => reject(err));
+        });
+    }
+
+    public deleteGuildBirthdayChannel: Function = (guild: Guild): Promise<Error | void> => {
+        return new Promise((resolve, reject) => {
+            this.birthdays.guilds[guild.id].channels
+
+            this.save().then(() => {
+                this.emit("birthdayGuildChannelDelete", guild);
+                resolve();
             }).catch((err: Error) => reject(err));
         });
     }
