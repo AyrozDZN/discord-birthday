@@ -30,6 +30,7 @@ export type userBirthdayData = {
     seeAge: boolean,
     date: Date,
     age: number,
+    nextBirthday: Date,
     daysBeforeNext: number,
     guilds: Guild[]
 }
@@ -39,6 +40,7 @@ export type memberBirthdayData = {
     seeAge: boolean,
     date: Date,
     age: number,
+    nextBirthday: Date,
     daysBeforeNext: number,
     guild: Guild,
 }

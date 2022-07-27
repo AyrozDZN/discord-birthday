@@ -73,7 +73,7 @@ export class Birthday {
                             guilds.push(guild);
                         });
                     });
-                    this.emit("isBirthday", user, guilds);
+                    if (guilds.length > 0) this.emit("isBirthday", user, guilds);
                 }).catch((err: Error) => {
                     throw err;
                 });
@@ -82,7 +82,10 @@ export class Birthday {
     }
 
     public setUserBirthday: Function = (user: User, date: Date, seeAge: boolean = true): Birthday => {
-        date.setHours(23, 59, 59, 999)
+
+        if (isNaN(date.getTime())) throw new Error("Invalid date");
+
+        date.setHours(23, 59, 59, 999);
 
         this.birthdays.birthdays[user.id] = {
             userId: user.id,
@@ -98,10 +101,10 @@ export class Birthday {
         return this;
     };
 
-    public getUserBirthday: Function = async (user: User): Promise<userBirthdayData> => {
+    public getUserBirthday: Function = async (user: User): Promise<userBirthdayData | undefined> => {
         return new Promise(async (resolve, reject) => {
             let guilds: Guild[] = [];
-            if (!this.birthdays.birthdays[user.id]) return reject(new Error("Birthday not defined for this user."));
+            if (!this.birthdays.birthdays[user.id]) return resolve(undefined);
 
             const date: Date = new Date(this.birthdays.birthdays[user.id].date);
             date.setFullYear(new Date().getFullYear());
@@ -109,9 +112,6 @@ export class Birthday {
                 date.setFullYear(new Date().getFullYear()+1);
             }
             let daysBeforeNext: number = Math.floor((Date.now() - date.getTime()) / (60 * 60 * 24 * 1000)) < 0 ? Math.floor((Date.now() - date.getTime()) / (60 * 60 * 24 * 1000))*-1 : Math.floor((Date.now() - date.getTime()) / (60 * 60 * 24 * 1000));
-            if (new Date(Date.now()).getDate() === date.getDate() && new Date(Date.now()).getMonth() === date.getMonth()) {
-                daysBeforeNext = 0;
-            }
 
             await this.birthdays.birthdays[user.id].guilds.forEach((guildId: string) => {
                 this.client.guilds.fetch(guildId).then((guild: Guild) => {
@@ -124,7 +124,8 @@ export class Birthday {
                 seeAge: this.birthdays.birthdays[user.id].seeAge,
                 date: new Date(this.birthdays.birthdays[user.id].date),
                 age: Math.floor((Date.now() - new Date(this.birthdays.birthdays[user.id].date).getTime()) / (60 * 60 * 24 * 365.25 * 1000)),
-                daysBeforeNext: daysBeforeNext,
+                nextBirthday: date,
+                daysBeforeNext: daysBeforeNext-1,
                 guilds: guilds
             }
 
@@ -133,7 +134,7 @@ export class Birthday {
     };
 
     public deleteUserBirthday: Function = (user: User): Birthday => {
-        if (!this.birthdays.birthdays[user.id]) throw new Error("Birthday not defined for this user.");
+        if (!this.birthdays.birthdays[user.id]) return this;
 
         this.birthdays.birthdays[user.id].guilds.forEach((guildId: string) => {
             this.birthdays.guilds[guildId].birthdays.splice(this.birthdays.guilds[guildId].birthdays.indexOf(user.id), 1);
@@ -148,19 +149,21 @@ export class Birthday {
         return this;
     };
 
-    public getGuildBirthdays: Function = async (guild: Guild): Promise<memberBirthdayData[]> => {
+    public getGuildBirthdays: Function = async (guild: Guild): Promise<memberBirthdayData[] | undefined> => {
         return new Promise(async (resolve, reject) => {
-            if (!this.birthdays.guilds[guild.id]) return reject(new Error("Guild has no activated birthday."));
+            if (!this.birthdays.guilds[guild.id]) return resolve(undefined);
 
             guild.members.fetch({user: this.birthdays.guilds[guild.id].birthdays}).then(async guildMembers => {
                 let birthdays: memberBirthdayData[] = [];
                 await guildMembers.forEach(guildMember => {
-                    this.getUserBirthday(guildMember.user).then((userData: userBirthdayData) => {
+                    this.getUserBirthday(guildMember.user).then((userData: userBirthdayData | undefined) => {
+                        if (!userData) return;
                         const data: memberBirthdayData = {
                             member: guildMember,
                             seeAge: userData.seeAge,
                             date: new Date(userData.date),
                             age: userData.age,
+                            nextBirthday: userData.nextBirthday,
                             daysBeforeNext: userData.daysBeforeNext,
                             guild: guild
                         }
@@ -174,8 +177,7 @@ export class Birthday {
     };
 
     public activateMemberBirthday: Function = (member: GuildMember): Birthday => {
-        if (!this.birthdays.birthdays[member.id]) throw new Error("Birthday not defined for this user.");
-        if (this.birthdays.guilds[member.guild.id].birthdays.indexOf(member.id) !== -1) throw new Error("Birthday already activated for this user.");
+        if (!this.birthdays.birthdays[member.id]) return this;
 
         if (!this.birthdays.guilds[member.guild.id]) {
             this.birthdays.guilds[member.guild.id] = {
@@ -183,6 +185,8 @@ export class Birthday {
                 birthdays: []
             };
         }
+
+        if (this.birthdays.guilds[member.guild.id].birthdays.indexOf(member.id) !== -1) throw new Error("Birthday already activated for this user.");
 
         this.birthdays.guilds[member.guild.id].birthdays.push(member.id);
         this.birthdays.birthdays[member.id].guilds.push(member.guild.id);
@@ -211,7 +215,9 @@ export class Birthday {
     };
 
     public checkMemberGuildBirthdaysStatus: Function = (member: GuildMember): boolean => {
-        return !!this.birthdays.guilds[member.guild.id].birthdays.includes(member.id);
+        if (!this.birthdays.guilds[member.guild.id]) return false;
+        return this.birthdays.guilds[member.guild.id].birthdays.indexOf(member.id) !== -1;
+
     };
 
     public setGuildBirthdayChannel: Function = (channel: TextChannel): Birthday => {
@@ -230,10 +236,10 @@ export class Birthday {
         return this;
     };
 
-    public getGuildBirthdayChannel: Function = async (guild: Guild): Promise<NonThreadGuildBasedChannel | null> => {
+    public getGuildBirthdayChannel: Function = async (guild: Guild): Promise<NonThreadGuildBasedChannel | undefined | null> => {
         return new Promise(async (resolve, reject) => {
-            if (!this.birthdays.guilds[guild.id]) return reject(new Error("This guild has no birthday channel."));
-            if (!this.birthdays.guilds[guild.id].channels.length) return reject(new Error("This guild has no birthday channel."));
+            if (!this.birthdays.guilds[guild.id]) return resolve(undefined);
+            if (!this.birthdays.guilds[guild.id].channels.length) return resolve(undefined);
 
             guild.channels.fetch(this.birthdays.guilds[guild.id].channels).then(channel => {
                 return resolve(channel);
@@ -242,9 +248,9 @@ export class Birthday {
     }
 
     public deleteGuildBirthdayChannel: Function = (guild: Guild): Birthday => {
-        if (!this.birthdays.guilds[guild.id]) throw new Error("Guild has no activated birthday.");
+        if (!this.birthdays.guilds[guild.id]) return this;
 
-        if (this.birthdays.guilds[guild.id].channels.length === 0) throw new Error("Guild has no activated birthday.");
+        if (this.birthdays.guilds[guild.id].channels.length === 0) return this;
 
         this.birthdays.guilds[guild.id].channels = "";
 
