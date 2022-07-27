@@ -47,11 +47,12 @@ client.birthday = new Birthday(client, {
 client.birthday.setUserBirthday(user, date, seeAge)
 ```
 
+
 | Parameter | Type | Optional | Default | Description |
-|--|--|--|
-| user | [User](https://discord.js.org/#/docs/discord.js/main/class/User) |  |  | The user whose birthday is to be set |
-| date | [Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) |  |  | The birthday date |
-| seeAge | [Boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | ✓ | true | Set the visibility variable accessible after |
+|--|--|--|--|--|
+| user |  [User](https://discord.js.org/#/docs/discord.js/main/class/User)  | | | The user whose birthday is to be set |
+| date |  [Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date)  | | | The birthday date |
+| seeAge |  [Boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean)  | ✓ | true | Set the visibility variable accessible after |
 
 returns : [Birthday](https://github.com/AyrozDZN/discord-birthday/blob/master/src/index.ts)
 
