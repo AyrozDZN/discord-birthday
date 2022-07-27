@@ -1,6 +1,6 @@
 {
   "name": "discord-birthday",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "discord-birthday is a powerful package that allows you to create a birthday system on your discord bot easily and quickly.",
   "main": "dist/index.js",
   "scripts": {
