@@ -176,7 +176,7 @@ export class Birthday {
     };
 
     public activateMemberBirthday: Function = (member: GuildMember): Birthday => {
-        if (!this.birthdays.birthdays[member.id]) return this;
+        if (!this.birthdays.birthdays[member.id]) throw new Error("Birthday not defined for this user.");
 
         if (!this.birthdays.guilds[member.guild.id]) {
             this.birthdays.guilds[member.guild.id] = {
@@ -200,7 +200,7 @@ export class Birthday {
     public deactivateMemberBirthday: Function = (member: GuildMember): Birthday => {
         if (!this.birthdays.birthdays[member.id]) throw new Error("Birthday not defined for this user.");
 
-        if (!this.birthdays.guilds[member.guild.id]) throw new Error("Guild has no activated birthday.");
+        if (!this.birthdays.guilds[member.guild.id]) throw new Error("Birthday not activated for this user.");
         if (this.birthdays.guilds[member.guild.id].birthdays.indexOf(member.id) === -1) throw new Error("Birthday not activated for this user.");
 
         this.birthdays.guilds[member.guild.id].birthdays.splice(this.birthdays.guilds[member.guild.id].birthdays.indexOf(member.id), 1);

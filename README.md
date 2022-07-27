@@ -44,18 +44,16 @@ client.birthday = new Birthday(client, {
 ## setUserBirthday
 
 ```js
-client.birthday.setUserBirthday(user, date, seeAge).catch(err => {
-    console.error(err);
-});
+client.birthday.setUserBirthday(user, date, seeAge)
 ```
 
-| Parameter | Type | Description |
+| Parameter | Type | Optional | Default | Description |
 |--|--|--|
-| user | [User](https://discord.js.org/#/docs/discord.js/main/class/User) | The user whose birthday is to be set |
-| date | [Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) | The birthday date |
-| seeAge | [Boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | Set the visibility variable accessible after |
+| user | [User](https://discord.js.org/#/docs/discord.js/main/class/User) |  |  | The user whose birthday is to be set |
+| date | [Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) |  |  | The birthday date |
+| seeAge | [Boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | ✓ | true | Set the visibility variable accessible after |
 
-returns : [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)
+returns : [Birthday](https://github.com/AyrozDZN/discord-birthday/blob/master/src/index.ts)
 
 ## getUserBirthday
 
@@ -68,6 +66,7 @@ client.birthday.getUserBirthday(user).then((birthday) => {
         seeAge: <Boolean>,
         date: <Date>,
         age: <Number>,
+        nextBirthday: <Date>,
         daysBeforeNext: <Number>,
         guilds: <Array<Guild>>,
     }
@@ -84,17 +83,14 @@ returns : [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Refe
 ## deleteUserBirthday
 
 ```js
-client.birthday.deleteUserBirthday(user).catch(err => {
-    console.error(err);
-});
+client.birthday.deleteUserBirthday(user)
 ```
 
 | Parameter | Type | Description |
 |--|--|--|
 | user | [User](https://discord.js.org/#/docs/discord.js/main/class/User) | The user whose birthday is to be delete |
 
-returns : [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)
-
+returns : [Birthday](https://github.com/AyrozDZN/discord-birthday/blob/master/src/index.ts)
 
 
 ## getGuildBirthdays
@@ -109,6 +105,7 @@ client.birthday.getGuildBirthdays(guild).then((birthdays) => {
             seeAge: <Boolean>,
             date: <Date>,
             age: <Number>,
+            nextBirthday: <Date>,
             daysBeforeNext: <Number>,
             guild: <Guild>
         },
@@ -127,30 +124,26 @@ returns : [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Refe
 ## activateMemberBirthday
 
 ```js
-client.birthday.activateMemberBirthday(member).catch(err => {
-    console.error(err);
-});
+client.birthday.activateMemberBirthday(member) // return error if already activated or member has no birthday set
 ```
 
 | Parameter | Type | Description |
 |--|--|--|
 | member | [GuildMember](https://discord.js.org/#/docs/discord.js/main/class/GuildMember) | The member whose birthday is to be activated |
 
-returns : [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)
+returns : [Birthday](https://github.com/AyrozDZN/discord-birthday/blob/master/src/index.ts)
 
 ## deactivateMemberBirthday
 
 ```js
-client.birthday.deactivateMemberBirthday(member).catch(err => {
-    console.error(err);
-});
+client.birthday.deactivateMemberBirthday(member) // return error if already deactivated or member has no birthday set
 ```
 
 | Parameter | Type | Description |
 |--|--|--|
 | member | [GuildMember](https://discord.js.org/#/docs/discord.js/main/class/GuildMember) | The member whose birthday is to be deactivated |
 
-returns : [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)
+returns : [Birthday](https://github.com/AyrozDZN/discord-birthday/blob/master/src/index.ts)
 
 ## checkMemberGuildBirthdaysStatus
 
@@ -167,16 +160,14 @@ returns : [boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Refe
 ## setGuildBirthdayChannel
 
 ```js
-client.birthday.setGuildBirthdayChannel(channel).catch(err => {
-    console.error(err);
-});
+client.birthday.setGuildBirthdayChannel(channel)
 ```
 
 | Parameter | Type | Description |
 |--|--|--|
 | channel | [TextChannel](https://discord.js.org/#/docs/discord.js/main/class/TextChannel) | The channel in which the birthdays will be wished |
 
-returns : [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)
+returns : [Birthday](https://github.com/AyrozDZN/discord-birthday/blob/master/src/index.ts)
 
 ## getGuildBirthdayChannel
 
@@ -195,16 +186,14 @@ returns : [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Refe
 ## deleteGuildBirthdayChannel
 
 ```js
-client.birthday.deleteGuildBirthdayChannel(guild).catch(err => {
-    console.error(err);
-});
+client.birthday.deleteGuildBirthdayChannel(guild)
 ```
 
 | Parameter | Type | Description |
 |--|--|--|
 | guild | [Guild](https://discord.js.org/#/docs/discord.js/main/class/Guild) | The guild in which the birthdays channel will be delete |
 
-returns : [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)
+returns : [Birthday](https://github.com/AyrozDZN/discord-birthday/blob/master/src/index.ts)
 
 # Events
 
