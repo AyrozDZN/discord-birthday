@@ -10,7 +10,7 @@ export { Timezone };
 
 export class Birthday {
     private readonly client: Client;
-    private options: Options;
+    public options: Options;
     private birthdays: BirthdayData;
 
     constructor(Client: Client, Options?: Options) {
@@ -102,7 +102,7 @@ export class Birthday {
     };
 
     public getUserBirthday: Function = async (user: User): Promise<userBirthdayData | undefined> => {
-        return new Promise(async (resolve, reject) => {
+        return new Promise(async (resolve) => {
             let guilds: Guild[] = [];
             if (!this.birthdays.birthdays[user.id]) return resolve(undefined);
 
@@ -168,7 +168,6 @@ export class Birthday {
                             guild: guild
                         }
                         birthdays.push(data);
-                        console.log(birthdays.length);
                     })
                 });
                 return resolve(birthdays);
